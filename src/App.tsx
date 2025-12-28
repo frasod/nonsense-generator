@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
 
 interface NonsenseItem {
@@ -39,6 +40,7 @@ function App() {
   const [savedNonsense, setSavedNonsense] = useKV<NonsenseItem[]>('nonsense-collection', [])
   const [currentNonsense, setCurrentNonsense] = useState<string>('')
   const [generateCount, setGenerateCount] = useState(0)
+  const [wordCount, setWordCount] = useState(5)
   const [calculation, setCalculation] = useState('')
   const [calcResult, setCalcResult] = useState<string>('')
   const [calcExplanation, setCalcExplanation] = useState<string>('')
@@ -47,8 +49,14 @@ function App() {
   const [translatedText, setTranslatedText] = useState('')
 
   const generateNonsense = () => {
-    const parts = NONSENSE_WORDS.map(group => group[Math.floor(Math.random() * group.length)])
-    const nonsense = `${parts[0]} ${parts[1]} ${parts[2]} ${parts[3]}`
+    const allWords = NONSENSE_WORDS.flat()
+    const words: string[] = []
+    
+    for (let i = 0; i < wordCount; i++) {
+      words.push(allWords[Math.floor(Math.random() * allWords.length)])
+    }
+    
+    const nonsense = words.join(' ')
     setCurrentNonsense(nonsense)
     setGenerateCount(generateCount + 1)
     
@@ -149,15 +157,38 @@ function App() {
                 </p>
               </div>
 
-              <div className="flex justify-center">
-                <Button
-                  onClick={generateNonsense}
-                  size="lg"
-                  className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                >
-                  <Shuffle className="mr-2" />
-                  Make Nonsense
-                </Button>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-foreground">
+                      Word Count: {wordCount}
+                    </label>
+                    <Badge variant="secondary">{wordCount} words</Badge>
+                  </div>
+                  <Slider
+                    value={[wordCount]}
+                    onValueChange={(value) => setWordCount(value[0])}
+                    min={5}
+                    max={10}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>5 words</span>
+                    <span>10 words</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button
+                    onClick={generateNonsense}
+                    size="lg"
+                    className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Shuffle className="mr-2" />
+                    Make Nonsense
+                  </Button>
+                </div>
               </div>
 
               <AnimatePresence mode="wait">
